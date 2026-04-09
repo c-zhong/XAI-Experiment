@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOC Analyst Training — Cybersecurity Triage</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #ffffff;
+    --bg2:      #f4f7fb;
+    --bg3:      #eaeff6;
+    --panel:    #ffffff;
+    --border:   #d0dae8;
+    --teal:     #0077a8;
+    --teal2:    #005f85;
+    --amber:    #b45309;
+    --green:    #16a34a;
+    --red:      #dc2626;
+    --white:    #1a2e42;
+    --muted:    #5a7898;
+    --muted2:   #9ab0c4;
+    --mono:     'Share Tech Mono', monospace;
+    --sans:     'Barlow', sans-serif;
+    --cond:     'Barlow Condensed', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+    background: rgba(255,255,255,0.98);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 2px 12px rgba(0,60,100,.07);
+  }
+  /* ── Row 1: brand bar ── */
+  .nav-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--sans); font-weight: 700; font-size: 15px;
+    color: var(--white); text-decoration: none; flex-shrink: 0;
+  }
+  .nav-brand .brand-icon {
+    width: 32px; height: 32px; background: var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .nav-brand .brand-sub {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    font-weight: 400; display: block; margin-top: 1px; letter-spacing: .06em;
+  }
+  .nav-right {
+    display: flex; align-items: center; gap: .75rem; flex-shrink: 0;
+  }
+  .nav-progress-label {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ── Row 2: section tabs ── */
+  .nav-tabs-row {
+    display: flex; align-items: stretch; justify-content: center;
+    padding: 0 1rem; height: 46px; gap: 0;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .nav-tabs-row::-webkit-scrollbar { display: none; }
+  .nav-sections {
+    display: flex; align-items: stretch; gap: 0; list-style: none;
+  }
+  .nav-sections li { flex-shrink: 0; }
+  .nav-sections a {
+    display: flex; align-items: center; gap: 7px;
+    padding: 0 16px; height: 46px;
+    font-family: var(--sans); font-size: 13px; font-weight: 600;
+    color: var(--muted); text-decoration: none;
+    border-bottom: 3px solid transparent;
+    transition: color .2s, border-color .2s, background .2s;
+    white-space: nowrap; cursor: pointer;
+  }
+  .nav-sections a:hover {
+    color: var(--teal); background: rgba(0,119,168,.05);
+  }
+  .nav-sections a.active {
+    color: var(--teal); border-bottom-color: var(--teal);
+    background: rgba(0,119,168,.04);
+  }
+  .nav-sections .step-badge {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--bg3); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    flex-shrink: 0; transition: background .2s, color .2s, border-color .2s;
+  }
+  .nav-sections a.active .step-badge,
+  .nav-sections a:hover .step-badge {
+    background: var(--teal); border-color: var(--teal); color: #fff;
+  }
+
+  /* ── Progress bar ── */
+  .nav-progress {
+    height: 3px; background: var(--bg3); position: relative;
+  }
+  .nav-progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--teal), #00b4d8);
+    width: 0%; transition: width .15s ease;
+  }
+
+  /* ── Mobile hamburger ── */
+  .nav-hamburger {
+    display: none; flex-direction: column; gap: 5px;
+    cursor: pointer; padding: 8px; background: none;
+    border: 1px solid var(--border); margin-left: .5rem;
+  }
+  .nav-hamburger span {
+    display: block; width: 22px; height: 2px; background: var(--muted);
+    transition: all .2s;
+  }
+
+  /* ── Mobile drawer ── */
+  .nav-drawer {
+    display: none; position: fixed; top: 105px; left: 0; right: 0;
+    background: #fff; border-bottom: 1px solid var(--border);
+    box-shadow: 0 8px 24px rgba(0,60,100,.1); z-index: 899;
+    padding: .5rem 0;
+  }
+  .nav-drawer.open { display: block; }
+  .nav-drawer a {
+    display: flex; align-items: center; gap: 12px;
+    padding: .75rem 2rem; font-size: 14px; font-weight: 600;
+    color: var(--muted); text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .nav-drawer a:hover, .nav-drawer a.active {
+    color: var(--teal); background: rgba(0,119,168,.04);
+    border-left-color: var(--teal);
+  }
+  .nav-drawer .drawer-num {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    width: 20px; text-align: center;
+  }
+
+  @media (max-width: 860px) {
+    .nav-tabs-row { display: none; }
+    .nav-hamburger { display: flex; }
+    .nav-progress-label { display: none; }
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(30px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity:0; transform:translateX(-20px); }
+    to   { opacity:1; transform:translateX(0); }
+  }
+  @keyframes scanline {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+  @keyframes pulse-border {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,119,168,.3); }
+    50%      { box-shadow: 0 0 0 6px rgba(0,119,168,0); }
+  }
+  @keyframes countUp {
+    from { opacity:0; }
+    to   { opacity:1; }
+  }
+  @keyframes drawLine {
+    from { width: 0; }
+    to   { width: 100%; }
+  }
+  @keyframes flicker {
+    0%,95%,100% { opacity:1; }
+    96%,98% { opacity:.7; }
+    97%,99% { opacity:.9; }
+  }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 2rem 4rem;
+    position: relative; overflow: hidden;
+    background: linear-gradient(160deg, #f0f6fc 0%, #ffffff 60%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,119,168,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,119,168,.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black, transparent);
+  }
+  .hero-glow {
+    position: absolute; top: 10%; right: -10%;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,119,168,.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; max-width: 900px; margin: 0 auto; width: 100%; }
+  .hero-eyebrow {
+    font-family: var(--mono); font-size: 12px; color: var(--teal);
+    letter-spacing: .2em; margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 10px;
+    animation: slideIn .6s ease both;
+  }
+  .hero-eyebrow::before {
+    content: ''; display: block; width: 32px; height: 1px; background: var(--teal);
+  }
+  h1 {
+    font-family: var(--cond); font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 900; line-height: .95; letter-spacing: -.02em;
+    text-transform: uppercase;
+    animation: fadeUp .7s .1s ease both;
+  }
+  h1 .accent { color: var(--teal); }
+  h1 .dim { color: #b0c4d8; }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--muted); max-width: 540px;
+    margin: 1.5rem 0 2.5rem;
+    animation: fadeUp .7s .25s ease both;
+  }
+  .hero-badges {
+    display: flex; flex-wrap: wrap; gap: .6rem;
+    animation: fadeUp .7s .35s ease both;
+  }
+  .badge {
+    font-family: var(--mono); font-size: 11px;
+    padding: 4px 12px; border: 1px solid;
+    letter-spacing: .08em;
+  }
+  .badge-teal  { border-color: var(--teal);  color: var(--teal);  background: rgba(0,119,168,.06); }
+  .badge-amber { border-color: var(--amber); color: var(--amber); background: rgba(245,158,11,.06); }
+  .badge-green { border-color: var(--green); color: var(--green); background: rgba(34,197,94,.06); }
+  .hero-scroll {
+    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    animation: fadeUp .7s .5s ease both;
+  }
+  .hero-scroll::after {
+    content: ''; width: 1px; height: 40px; background: linear-gradient(var(--muted), transparent);
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 5rem 2rem; position: relative; }
+  .section-inner { max-width: 1000px; margin: 0 auto; }
+  .section-label {
+    font-family: var(--mono); font-size: 11px; color: var(--teal);
+    letter-spacing: .2em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
+  }
+  .section-label::before { content:''; width:24px; height:1px; background:var(--teal); }
+  h2 {
+    font-family: var(--cond); font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900; text-transform: uppercase; letter-spacing: -.01em;
+    line-height: 1; margin-bottom: .5rem;
+  }
+  h2 .accent { color: var(--teal); }
+  .section-desc {
+    color: var(--muted); font-size: 1rem; max-width: 560px;
+    margin-bottom: 3rem; line-height: 1.7;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0;
+  }
+
+  /* ── OVERVIEW CARDS ── */
+  .cards-3 {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+  }
+  .card {
+    background: var(--panel); padding: 2rem;
+    position: relative; overflow: hidden;
+    transition: background .2s;
+  }
+  .card:hover { background: var(--bg3); }
+  .card-icon {
+    font-size: 2rem; margin-bottom: 1rem;
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+  }
+  .card-num {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    letter-spacing: .1em; margin-bottom: .5rem;
+  }
+  .card h3 {
+    font-family: var(--cond); font-size: 1.3rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .02em; margin-bottom: .6rem;
+  }
+  .card p { font-size: .9rem; color: var(--muted); line-height: 1.6; }
+  .card-accent { position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
+
+  /* ── WORKFLOW STEPS ── */
+  #workflow { background: var(--bg2); }
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: grid; grid-template-columns: 80px 1fr;
+    border: 1px solid var(--border); border-bottom: none;
+    background: var(--panel);
+    transition: background .2s, border-color .2s;
+    cursor: default;
+  }
+  .step:last-child { border-bottom: 1px solid var(--border); }
+  .step:hover { background: var(--bg3); border-color: var(--teal2); }
+  .step-num {
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--cond); font-size: 2.5rem; font-weight: 900;
+    color: #c8d8e8; border-right: 1px solid var(--border);
+    transition: color .2s;
+  }
+  .step:hover .step-num { color: var(--teal); }
+  .step-body { padding: 1.5rem 2rem; }
+  .step-tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .15em;
+    padding: 2px 8px; margin-bottom: .6rem; display: inline-block;
+  }
+  .step-body h3 {
+    font-family: var(--cond); font-size: 1.4rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .02em; margin-bottom: .4rem;
+  }
+  .step-body p { font-size: .9rem; color: var(--muted); line-height: 1.65; }
+  .step-highlight {
+    margin-top: .8rem; padding: .6rem 1rem;
+    border-left: 2px solid var(--amber);
+    background: rgba(180,83,9,.05);
+    font-size: .85rem; color: var(--amber);
+    font-family: var(--mono);
+  }
+
+  /* ── IDS COMPARISON ── */
+  #ids { background: var(--bg); }
+  .ids-grid {
+    display: grid; grid-template-columns: 1fr 60px 1fr; gap: 0;
+    align-items: start;
+  }
+  .ids-col {
+    border: 1px solid var(--border); background: var(--panel);
+    padding: 2rem;
+  }
+  .ids-col.active {
+    border-color: var(--teal);
+    box-shadow: 0 0 40px rgba(0,119,168,.1);
+  }
+  .ids-vs {
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--cond); font-size: 1.2rem; font-weight: 900;
+    color: var(--muted); padding-top: 3rem;
+  }
+  .ids-col h3 {
+    font-family: var(--cond); font-size: 1.4rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem;
+  }
+  .ids-col .sub { font-family: var(--mono); font-size: 11px; margin-bottom: 1.5rem; }
+  .ids-list { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+  .ids-list li {
+    font-size: .9rem; color: var(--muted); line-height: 1.5;
+    display: flex; gap: .7rem; align-items: flex-start;
+  }
+  .ids-list li::before { content: '—'; color: var(--muted); flex-shrink: 0; }
+  .ids-tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+    padding: 2px 8px; display: inline-block; margin-bottom: 1rem;
+  }
+
+  /* ── LIME EXPLAINER ── */
+  #lime { background: var(--bg2); }
+  .lime-layout {
+    display: grid; grid-template-columns: 220px 1fr 200px; gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+  }
+  .lime-panel {
+    background: var(--panel); padding: 1.5rem;
+  }
+  .lime-panel h4 {
+    font-family: var(--mono); font-size: 11px; color: var(--teal);
+    letter-spacing: .12em; text-transform: uppercase; margin-bottom: 1.2rem;
+    padding-bottom: .6rem; border-bottom: 1px solid var(--border);
+  }
+  .prob-row { margin-bottom: .8rem; }
+  .prob-label {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    display: flex; justify-content: space-between; margin-bottom: 4px;
+  }
+  .prob-bar { height: 20px; position: relative; background: var(--bg3); overflow: hidden; }
+  .prob-fill {
+    height: 100%; position: absolute; left: 0; top: 0;
+    display: flex; align-items: center; padding-left: 6px;
+    font-family: var(--mono); font-size: 10px; color: #ffffff;
+    font-weight: bold;
+    transition: width 1s ease;
+  }
+  .lime-callout {
+    margin-top: 1rem; padding: .8rem;
+    border: 1px solid var(--border); background: var(--bg2);
+    font-size: .82rem; color: var(--muted); line-height: 1.55;
+  }
+  .lime-callout .num {
+    font-family: var(--cond); font-size: 1.2rem; font-weight: 900;
+    color: var(--teal); display: block; margin-bottom: .3rem;
+  }
+  /* Feature chart */
+  .chart-area { padding: 1.5rem; background: var(--panel); }
+  .chart-area h4 {
+    font-family: var(--mono); font-size: 11px; color: var(--teal);
+    letter-spacing: .12em; text-transform: uppercase; margin-bottom: 1.2rem;
+    padding-bottom: .6rem; border-bottom: 1px solid var(--border);
+  }
+  .chart-row {
+    display: grid; grid-template-columns: 150px 1fr; gap: .5rem;
+    align-items: center; margin-bottom: .5rem;
+  }
+  .chart-label {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    text-align: right; padding-right: .8rem; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chart-bars { display: flex; height: 18px; gap: 1px; }
+  .bar-neg, .bar-pos {
+    height: 100%; display: flex; align-items: center;
+    font-family: var(--mono); font-size: 9px;
+    transition: width .8s ease;
+  }
+  .bar-neg { background: rgba(0,95,133,.55); justify-content: flex-end; padding-right: 3px; color: #ffffff; }
+  .bar-pos { background: rgba(180,83,9,.7); justify-content: flex-start; padding-left: 3px; color: #ffffff; }
+  .chart-axis-label {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    text-align: center; margin-top: .8rem;
+  }
+  /* Values panel */
+  .val-row {
+    margin-bottom: .6rem; padding: .5rem .7rem;
+    border: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    transition: border-color .2s;
+  }
+  .val-row:hover { border-color: var(--teal2); }
+  .val-name { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .val-num { font-family: var(--mono); font-size: 13px; font-weight: bold; }
+  .val-row.orange .val-num { color: var(--amber); }
+  .val-row.blue .val-num   { color: var(--teal); }
+
+  /* ── ATTACK TYPES ── */
+  #attacks { background: var(--bg); }
+  .attacks-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+  }
+  .attack-card {
+    background: var(--panel); padding: 1.8rem;
+    position: relative; overflow: hidden;
+    transition: background .2s;
+  }
+  .attack-card:hover { background: var(--bg3); }
+  .attack-type {
+    font-family: var(--cond); font-size: 1.6rem; font-weight: 900;
+    text-transform: uppercase; letter-spacing: .03em; margin-bottom: .3rem;
+  }
+  .attack-card .desc {
+    font-size: .88rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.2rem;
+  }
+  .wireshark-look {
+    background: var(--bg); border: 1px solid var(--border);
+    padding: .8rem; font-family: var(--mono); font-size: 11px;
+  }
+  .ws-row { display: flex; gap: .5rem; margin-bottom: 3px; }
+  .ws-ip  { color: var(--teal2); }
+  .ws-flag{ padding: 0 4px; font-size: 9px; }
+  .flag-syn  { background: rgba(34,197,94,.2);  color: var(--green); }
+  .flag-rst  { background: rgba(239,68,68,.2);  color: var(--red); }
+  .corner-tag {
+    position: absolute; top: 0; right: 0;
+    font-family: var(--mono); font-size: 10px;
+    padding: 3px 10px; letter-spacing: .08em;
+  }
+
+  /* ── PRIORITIZATION ── */
+  #priority { background: var(--bg2); }
+  .priority-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+    margin-bottom: 1px;
+  }
+  .priority-panel {
+    background: var(--panel); padding: 2rem;
+  }
+  .priority-panel h3 {
+    font-family: var(--cond); font-size: 1.3rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .03em; margin-bottom: 1.2rem;
+  }
+  .criteria-row {
+    display: flex; gap: 1rem; padding: .8rem 0;
+    border-bottom: 1px solid var(--border); align-items: flex-start;
+  }
+  .criteria-row:last-child { border-bottom: none; }
+  .criteria-icon {
+    width: 36px; height: 36px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); font-size: 1rem;
+  }
+  .criteria-label {
+    font-family: var(--cond); font-size: 1rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem;
+  }
+  .criteria-desc { font-size: .85rem; color: var(--muted); line-height: 1.5; }
+  .reality-list { list-style: none; }
+  .reality-list li {
+    padding: .7rem 0; border-bottom: 1px solid var(--border);
+    font-size: .9rem; color: var(--muted); display: flex; gap: .7rem;
+  }
+  .reality-list li::before { content: '//'; color: var(--red); font-family: var(--mono); }
+  .priority-callout {
+    background: rgba(180,83,9,.04); border: 1px solid var(--amber);
+    padding: 1.2rem 2rem;
+    font-family: var(--mono); font-size: .85rem; color: var(--amber);
+    border-top: none; display: flex; gap: .8rem; align-items: flex-start;
+  }
+  .priority-callout::before { content: '⚡'; flex-shrink: 0; }
+
+  /* ── CONFIRM / DISMISS ── */
+  #decision { background: var(--bg); }
+  .decision-grid {
+    display: grid; grid-template-columns: 1fr 160px 1fr; gap: 0;
+    align-items: center;
+  }
+  .decision-col {
+    border: 1px solid var(--border); background: var(--panel); padding: 2rem;
+  }
+  .decision-col.true  { border-color: var(--green); }
+  .decision-col.false { border-color: var(--red); }
+  .decision-center {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0; padding: 0;
+  }
+  .dec-connector {
+    width: 1px; height: 40px; background: var(--muted2);
+  }
+  .dec-node {
+    width: 120px; height: 60px;
+    border: 1px solid var(--teal); background: var(--bg2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--cond); font-size: 1rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em; color: var(--teal);
+    text-align: center; line-height: 1.2;
+  }
+  .dec-label {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    text-align: center; padding: 4px 0; letter-spacing: .1em;
+  }
+  .decision-col h3 {
+    font-family: var(--cond); font-size: 1.6rem; font-weight: 900;
+    text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem;
+  }
+  .decision-col.true  h3 { color: var(--green); }
+  .decision-col.false h3 { color: var(--red); }
+  .decision-col .sub {
+    font-family: var(--mono); font-size: 11px; margin-bottom: 1.2rem;
+  }
+  .decision-col.true  .sub { color: var(--green); }
+  .decision-col.false .sub { color: var(--red); }
+  .action-list { list-style: none; }
+  .action-list li {
+    padding: .6rem 0; border-bottom: 1px solid var(--border);
+    font-size: .88rem; color: var(--muted); display: flex; gap: .6rem;
+  }
+  .action-list li:last-child { border-bottom: none; }
+  .action-list li .arrow { font-family: var(--mono); flex-shrink: 0; }
+  .decision-col.true  .action-list li .arrow { color: var(--green); }
+  .decision-col.false .action-list li .arrow { color: var(--red); }
+  .decision-note {
+    grid-column: 1 / -1; margin-top: 1px;
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 1rem 2rem; font-family: var(--mono);
+    font-size: .82rem; color: var(--muted); border-top: none;
+    display: flex; gap: .8rem;
+  }
+  .decision-note::before { content: 'NOTE:'; color: var(--teal); flex-shrink: 0; }
+
+  /* ── SUMMARY ── */
+  #summary { background: var(--bg2); }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+  }
+  .summary-item {
+    background: var(--panel); padding: 1.8rem;
+    display: flex; gap: 1.2rem;
+    transition: background .2s;
+  }
+  .summary-item:hover { background: var(--bg3); }
+  .sum-num {
+    font-family: var(--cond); font-size: 3rem; font-weight: 900;
+    line-height: 1; color: #c8d8e8; flex-shrink: 0;
+    transition: color .2s;
+  }
+  .summary-item:hover .sum-num { color: var(--teal); }
+  .sum-title {
+    font-family: var(--cond); font-size: 1.1rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .03em; margin-bottom: .4rem;
+  }
+  .sum-desc { font-size: .88rem; color: var(--muted); line-height: 1.6; }
+  .closing-bar {
+    background: var(--teal); color: #ffffff;
+    padding: 1.2rem 2rem;
+    font-family: var(--cond); font-size: 1.4rem; font-weight: 900;
+    text-transform: uppercase; letter-spacing: .06em;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 1px;
+  }
+  .closing-bar .mono-tag {
+    font-family: var(--mono); font-size: 11px; font-weight: 400;
+    letter-spacing: .1em;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg); border-top: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: .1s; }
+  .reveal-delay-2 { transition-delay: .2s; }
+  .reveal-delay-3 { transition-delay: .3s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .cards-3, .attacks-grid, .summary-grid { grid-template-columns: 1fr; }
+    .ids-grid { grid-template-columns: 1fr; }
+    .ids-vs { display: none; }
+    .decision-grid { grid-template-columns: 1fr; }
+    .decision-center { flex-direction: row; }
+    .dec-connector { width: 30px; height: 1px; }
+    .priority-grid { grid-template-columns: 1fr; }
+    .lime-layout { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <!-- Row 1: Brand + right controls -->
+  <div class="nav-top">
+    <a href="#hero" class="nav-brand">
+      <div class="brand-icon">🛡</div>
+      <div>
+        SOC Analyst Training
+        <span class="brand-sub">CYBERSECURITY TRIAGE · MODULE 01</span>
+      </div>
+    </a>
+    <div class="nav-right">
+      <span class="nav-progress-label" id="progressLabel">0% read</span>
+      <button class="nav-hamburger" id="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Row 2: Section navigation tabs -->
+  <div class="nav-tabs-row">
+    <ul class="nav-sections" id="navSections">
+      <li><a href="#overview"  class="nav-link" data-section="overview">
+        <span class="step-badge">1</span>Overview
+      </a></li>
+      <li><a href="#workflow"  class="nav-link" data-section="workflow">
+        <span class="step-badge">2</span>Workflow
+      </a></li>
+      <li><a href="#ids"       class="nav-link" data-section="ids">
+        <span class="step-badge">3</span>Detection Systems
+      </a></li>
+      <li><a href="#lime"      class="nav-link" data-section="lime">
+        <span class="step-badge">4</span>XAI Explained
+      </a></li>
+      <li><a href="#attacks"   class="nav-link" data-section="attacks">
+        <span class="step-badge">5</span>Attack Patterns
+      </a></li>
+      <li><a href="#priority"  class="nav-link" data-section="priority">
+        <span class="step-badge">6</span>Prioritization
+      </a></li>
+      <li><a href="#decision"  class="nav-link" data-section="decision">
+        <span class="step-badge">7</span>Decision
+      </a></li>
+      <li><a href="#summary"   class="nav-link" data-section="summary">
+        <span class="step-badge">8</span>Summary
+      </a></li>
+    </ul>
+  </div>
+
+  <!-- Reading progress bar -->
+  <div class="nav-progress">
+    <div class="nav-progress-fill" id="progressFill"></div>
+  </div>
+</nav>
+
+<!-- Mobile drawer -->
+<div class="nav-drawer" id="navDrawer">
+  <a href="#overview"  class="drawer-link" data-section="overview">
+    <span class="drawer-num">01</span>Overview
+  </a>
+  <a href="#workflow"  class="drawer-link" data-section="workflow">
+    <span class="drawer-num">02</span>Workflow
+  </a>
+  <a href="#ids"       class="drawer-link" data-section="ids">
+    <span class="drawer-num">03</span>Detection Systems
+  </a>
+  <a href="#lime"      class="drawer-link" data-section="lime">
+    <span class="drawer-num">04</span>XAI Explained
+  </a>
+  <a href="#attacks"   class="drawer-link" data-section="attacks">
+    <span class="drawer-num">05</span>Attack Patterns
+  </a>
+  <a href="#priority"  class="drawer-link" data-section="priority">
+    <span class="drawer-num">06</span>Prioritization
+  </a>
+  <a href="#decision"  class="drawer-link" data-section="decision">
+    <span class="drawer-num">07</span>Decision
+  </a>
+  <a href="#summary"   class="drawer-link" data-section="summary">
+    <span class="drawer-num">08</span>Summary
+  </a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">MODULE 01 — ANALYST TRAINING</div>
+    <h1>
+      Cybersecurity<br>
+      <span class="accent">Triage</span><br>
+      <span class="dim">Investigation</span>
+    </h1>
+    <p class="hero-sub">
+      Step into a Security Operations Center. Analyze AI-generated alerts,
+      investigate network traffic, and determine which threats are real.
+    </p>
+    <div class="hero-badges">
+      <span class="badge badge-teal">15 ALERTS</span>
+      <span class="badge badge-amber">ML-BASED IDS</span>
+      <span class="badge badge-teal">LIME EXPLANATIONS</span>
+      <span class="badge badge-green">PCAP INVESTIGATION</span>
+      <span class="badge badge-amber">WIRESHARK</span>
+    </div>
+  </div>
+  <div class="hero-scroll">SCROLL</div>
+</section>
+
+<hr class="divider">
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="section-inner">
+    <div class="section-label reveal">Task Overview</div>
+    <h2 class="reveal">What Is <span class="accent">This Task</span></h2>
+    <p class="section-desc reveal">
+      This training is modeled on real-world cybersecurity operations —
+      the decisions, tools, and tradeoffs that SOC analysts face every day.
+    </p>
+    <div class="cards-3 reveal">
+      <div class="card">
+        <div class="card-accent" style="background:var(--amber)"></div>
+        <div class="card-num">ROLE_01</div>
+        <div class="card-icon">🎯</div>
+        <h3>Your Role</h3>
+        <p>You are a cybersecurity triage analyst — the first line of defense when alerts arrive. You decide what is real and what is noise.</p>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--teal)"></div>
+        <div class="card-num">CONTEXT_02</div>
+        <div class="card-icon">🏢</div>
+        <h3>The Scenario</h3>
+        <p>Based on real SOC operations. The tools are authentic, the data is realistic, and the decisions reflect genuine analyst tradeoffs.</p>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--green)"></div>
+        <div class="card-num">GOAL_03</div>
+        <div class="card-icon">📋</div>
+        <h3>Your Goal</h3>
+        <p>Determine which attacks are real, reconstruct attacker activity, and produce a clear report understandable by non-technical stakeholders.</p>
+      </div>
+    </div>
+    <div style="margin-top:1px; background:var(--bg2); border:1px solid var(--border); border-top:none; padding:1rem 2rem; border-left:3px solid var(--red);" class="reveal">
+      <span style="font-family:var(--mono); font-size:.82rem; color:var(--red);">⚠ WARNING — </span>
+      <span style="font-family:var(--mono); font-size:.82rem; color:var(--muted);">Some alerts are false positives. Not every flag from the AI represents a real attack. Critical evaluation is required.</span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- WORKFLOW -->
+<section id="workflow">
+  <div class="section-inner">
+    <div class="section-label reveal">Investigation Process</div>
+    <h2 class="reveal">Analyst <span class="accent">Workflow</span></h2>
+    <p class="section-desc reveal">
+      Real SOC analysts follow a structured sequence. Understanding this workflow
+      before you touch any data is what separates disciplined analysis from guesswork.
+    </p>
+    <div class="steps reveal">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-tag badge badge-teal">INITIAL</div>
+          <h3>Alert Arrives</h3>
+          <p>The intrusion detection system flags a suspicious network connection and surfaces a summary: source IP, destination IP, ports, timing, and the predicted attack category. This is your starting point — nothing more.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-tag badge badge-amber">CRITICAL</div>
+          <h3>Triage &amp; Prioritize</h3>
+          <p>Because alerts arrive continuously and analyst time is finite, you must decide which alerts deserve immediate investigation. This is one of the most consequential decisions in the entire process.</p>
+          <div class="step-highlight">⚡ Time pressure is constant in a real SOC. Prioritization is how analysts protect their attention.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-tag badge badge-teal">ACTION</div>
+          <h3>Acknowledge the Alert</h3>
+          <p>Formally take ownership of the selected alert. In production SOC environments, this prevents two analysts from investigating the same incident simultaneously and wasting resources.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-tag badge badge-teal">DEEP DIVE</div>
+          <h3>Investigate PCAP in Wireshark</h3>
+          <p>Open the packet capture file and look for concrete packet-level evidence. Filter by IP, port, protocol, and time window. Look for the specific behavioral patterns the LIME explanation pointed you toward.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-tag badge badge-green">OUTCOME</div>
+          <h3>Confirm or Dismiss</h3>
+          <p>Based on the PCAP evidence — or lack of it — classify the alert: true positive (confirmed attack) or false positive (benign traffic misclassified by the AI). Document your reasoning either way.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- IDS -->
+<section id="ids">
+  <div class="section-inner">
+    <div class="section-label reveal">Detection Systems</div>
+    <h2 class="reveal">How Are <span class="accent">Alerts Generated</span></h2>
+    <p class="section-desc reveal">
+      Alerts come from Intrusion Detection Systems (IDS). There are two fundamentally
+      different approaches — understanding the difference matters for how you evaluate alerts.
+    </p>
+    <div class="ids-grid reveal">
+
+      <div class="ids-col">
+        <div class="ids-tag badge badge-teal" style="border-color:var(--muted); color:var(--muted);">APPROACH A</div>
+        <h3>Signature-Based</h3>
+        <p class="sub" style="color:var(--muted);">Rule-driven detection</p>
+        <ul class="ids-list">
+          <li>Maintains a database of known attack patterns (signatures)</li>
+          <li>Raises an alert when traffic matches an existing signature exactly</li>
+          <li>Fast and highly reliable for previously documented attacks</li>
+          <li>Cannot detect novel or zero-day threats with no prior signature</li>
+          <li>Requires constant manual updates as new attacks emerge</li>
+        </ul>
+      </div>
+
+      <div class="ids-vs">VS</div>
+
+      <div class="ids-col active">
+        <div class="ids-tag badge badge-teal">★ USED IN THIS TASK</div>
+        <h3 style="color:var(--teal);">Machine Learning-Based</h3>
+        <p class="sub" style="color:var(--teal);">Anomaly detection</p>
+        <ul class="ids-list">
+          <li>Trained on large volumes of real network traffic data</li>
+          <li>Learns a statistical model of what "normal" behavior looks like</li>
+          <li>Raises an alert when a connection deviates from the learned baseline</li>
+          <li>Can detect novel, unknown, and zero-day attacks</li>
+          <li>May produce false positives — human review is always required</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- LIME -->
+<section id="lime">
+  <div class="section-inner">
+    <div class="section-label reveal">Explainable AI</div>
+    <h2 class="reveal">Reading a <span class="accent">LIME Explanation</span></h2>
+    <p class="section-desc reveal">
+      Every alert includes a visual explanation generated by LIME (Local Interpretable
+      Model-agnostic Explanations). You don't need to know the math — here's how to read it.
+    </p>
+
+    <div class="lime-layout reveal">
+
+      <!-- Left: probabilities + callout -->
+      <div class="lime-panel">
+        <h4>Prediction Probabilities</h4>
+        <div class="prob-row">
+          <div class="prob-label"><span>NORMAL</span><span>0.47</span></div>
+          <div class="prob-bar">
+            <div class="prob-fill" id="prob-normal" style="width:47%;background:#4A9FD4;">0.47</div>
+          </div>
+        </div>
+        <div class="prob-row">
+          <div class="prob-label"><span>ABNORMAL</span><span>0.53</span></div>
+          <div class="prob-bar">
+            <div class="prob-fill" id="prob-abnormal" style="width:53%;background:var(--amber);">0.53</div>
+          </div>
+        </div>
+        <div class="lime-callout">
+          <span class="num">① Confidence</span>
+          A score of 0.53 is borderline. The model barely leans toward flagging this as suspicious. Low confidence = treat the alert with more skepticism before investing investigation time.
+        </div>
+        <div class="lime-callout" style="margin-top:.6rem;">
+          <span class="num">④ Feature Values</span>
+          The table on the right shows the actual measured values for the top-influencing features. Use these as specific data points to search for when you open Wireshark.
+        </div>
+      </div>
+
+      <!-- Center: bar chart -->
+      <div class="chart-area">
+        <h4>Feature Impact Chart — ② Orange = Abnormal &nbsp;|&nbsp; ③ Blue = Normal</h4>
+        <div class="chart-row">
+          <div class="chart-label">Bwd IAT Min</div>
+          <div class="chart-bars">
+            <div class="bar-neg" style="width:60px;"></div>
+            <div style="width:1px; background:var(--border);"></div>
+            <div class="bar-pos" style="width:120px;"></div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Fwd Pkt Len Mean</div>
+          <div class="chart-bars">
+            <div class="bar-neg" style="width:60px;"></div>
+            <div style="width:1px; background:var(--border);"></div>
+            <div class="bar-pos" style="width:90px;"></div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Init Bwd Win Byts</div>
+          <div class="chart-bars">
+            <div class="bar-neg" style="width:60px;"></div>
+            <div style="width:1px; background:var(--border);"></div>
+            <div class="bar-pos" style="width:60px;"></div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">FIN Flag Cnt</div>
+          <div class="chart-bars">
+            <div class="bar-neg" style="width:100px;"></div>
+            <div style="width:1px; background:var(--border);"></div>
+            <div class="bar-pos" style="width:0px;"></div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Flow Byts/s</div>
+          <div class="chart-bars">
+            <div class="bar-neg" style="width:60px;"></div>
+            <div style="width:1px; background:var(--border);"></div>
+            <div class="bar-pos" style="width:50px;"></div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Tot Bwd Pkts</div>
+          <div class="chart-bars">
+            <div class="bar-neg" style="width:80px;"></div>
+            <div style="width:1px; background:var(--border);"></div>
+            <div class="bar-pos" style="width:0px;"></div>
+          </div>
+        </div>
+        <div class="chart-axis-label">← pushes toward NORMAL &nbsp;|&nbsp; pushes toward ABNORMAL →</div>
+        <div style="margin-top:1.2rem; padding:.8rem; background:var(--bg2); border:1px solid var(--border); font-size:.82rem; color:var(--muted); font-family:var(--mono); line-height:1.5;">
+          The <span style="color:var(--amber);">longer the orange bar</span>, the more that feature contributed to the abnormal prediction. Significant <span style="color:#4A9FD4;">blue bars</span> argue against classification as an attack — high blue volume increases false positive probability.
+        </div>
+      </div>
+
+      <!-- Right: values -->
+      <div class="lime-panel">
+        <h4>Feature Values</h4>
+        <div class="val-row orange">
+          <span class="val-name">Bwd IAT Min</span>
+          <span class="val-num">384</span>
+        </div>
+        <div class="val-row orange">
+          <span class="val-name">Fwd Pkt Mean</span>
+          <span class="val-num">32</span>
+        </div>
+        <div class="val-row orange">
+          <span class="val-name">Init Bwd Win</span>
+          <span class="val-num">64163</span>
+        </div>
+        <div class="val-row blue">
+          <span class="val-name">FIN Flag Cnt</span>
+          <span class="val-num">0</span>
+        </div>
+        <div class="val-row orange">
+          <span class="val-name">Flow Byts/s</span>
+          <span class="val-num">256720</span>
+        </div>
+        <div class="val-row blue">
+          <span class="val-name">Tot Bwd Pkts</span>
+          <span class="val-num">4</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ATTACK TYPES -->
+<section id="attacks">
+  <div class="section-inner">
+    <div class="section-label reveal">PCAP Evidence Patterns</div>
+    <h2 class="reveal">What to Look For <span class="accent">in Wireshark</span></h2>
+    <p class="section-desc reveal">
+      Each attack type leaves a distinctive fingerprint in the packet data.
+      Know the pattern before you open the capture file.
+    </p>
+    <div class="attacks-grid reveal">
+
+      <div class="attack-card">
+        <div class="corner-tag" style="background:rgba(0,119,168,.08); color:var(--teal); border-bottom:1px solid var(--border); border-left:1px solid var(--border);">TYPE_01</div>
+        <div class="attack-type" style="color:var(--teal);">Port Scan</div>
+        <p class="desc">A reconnaissance technique where an attacker systematically probes a target machine by sending connection requests to many different port numbers. The goal is to discover which ports are open and which services are running, in order to identify potential entry points before launching a more targeted attack.</p>
+        <div class="pattern-box" style="background:rgba(0,119,168,.05); border:1px solid rgba(0,119,168,.18); padding:1rem; margin-top:1rem;">
+          <div class="pattern-title" style="font-family:var(--mono); font-size:10px; color:var(--teal); letter-spacing:.12em; margin-bottom:.7rem;">TRAFFIC PATTERN TO LOOK FOR</div>
+          <ul style="list-style:none; display:flex; flex-direction:column; gap:.45rem;">
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--teal); font-family:var(--mono);">→</span> A single source IP sending connection attempts to many different destination ports on the same target</li>
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--teal); font-family:var(--mono);">→</span> Connections happen in rapid succession within a very short time window</li>
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--teal); font-family:var(--mono);">→</span> Most connections receive no response or are immediately reset — the attacker is just probing, not establishing sessions</li>
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--teal); font-family:var(--mono);">→</span> Very low packet count per connection — typically just one or two packets each</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="attack-card">
+        <div class="corner-tag" style="background:rgba(180,83,9,.06); color:var(--amber); border-bottom:1px solid var(--border); border-left:1px solid var(--border);">TYPE_02</div>
+        <div class="attack-type" style="color:var(--amber);">Brute Force</div>
+        <p class="desc">An automated attack where the attacker repeatedly attempts to authenticate to a service — such as SSH, FTP, or a web login — by trying many different username and password combinations in quick succession, hoping to eventually guess valid credentials.</p>
+        <div class="pattern-box" style="background:rgba(180,83,9,.05); border:1px solid rgba(180,83,9,.18); padding:1rem; margin-top:1rem;">
+          <div class="pattern-title" style="font-family:var(--mono); font-size:10px; color:var(--amber); letter-spacing:.12em; margin-bottom:.7rem;">TRAFFIC PATTERN TO LOOK FOR</div>
+          <ul style="list-style:none; display:flex; flex-direction:column; gap:.45rem;">
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--amber); font-family:var(--mono);">→</span> A single source IP making repeated connection attempts to the same destination port on the same target</li>
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--amber); font-family:var(--mono);">→</span> Each connection is short-lived and ends with an authentication failure or reset</li>
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--amber); font-family:var(--mono);">→</span> The pattern repeats at machine speed — far faster than a human could type credentials manually</li>
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--amber); font-family:var(--mono);">→</span> High connection count to a login-related port within a very narrow time window</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="attack-card">
+        <div class="corner-tag" style="background:rgba(220,38,38,.06); color:var(--red); border-bottom:1px solid var(--border); border-left:1px solid var(--border);">TYPE_03</div>
+        <div class="attack-type" style="color:var(--red);">HTTP DDoS</div>
+        <p class="desc">A volumetric denial-of-service attack where the target web server is overwhelmed with a massive flood of HTTP requests, far exceeding what any legitimate user traffic could produce. The aim is to exhaust server resources — CPU, memory, or bandwidth — so that the service becomes unavailable to real users.</p>
+        <div class="pattern-box" style="background:rgba(220,38,38,.05); border:1px solid rgba(220,38,38,.18); padding:1rem; margin-top:1rem;">
+          <div class="pattern-title" style="font-family:var(--mono); font-size:10px; color:var(--red); letter-spacing:.12em; margin-bottom:.7rem;">TRAFFIC PATTERN TO LOOK FOR</div>
+          <ul style="list-style:none; display:flex; flex-direction:column; gap:.45rem;">
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--red); font-family:var(--mono);">→</span> An abnormally high volume of HTTP requests all directed at a single destination IP address</li>
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--red); font-family:var(--mono);">→</span> Requests arrive at a rate that is orders of magnitude above normal web traffic</li>
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--red); font-family:var(--mono);">→</span> Traffic is sustained over time rather than being a single brief burst — the flow duration is comparatively long</li>
+            <li style="font-size:.88rem; color:var(--muted); display:flex; gap:.6rem;"><span style="color:var(--red); font-family:var(--mono);">→</span> Packets are small and uniform — consistent with automated request flooding rather than genuine browsing behaviour</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PRIORITY -->
+<section id="priority">
+  <div class="section-inner">
+    <div class="section-label reveal">Step 2 Deep Dive</div>
+    <h2 class="reveal">How to <span class="accent">Prioritize</span></h2>
+    <p class="section-desc reveal">
+      You cannot investigate 15 alerts with equal depth. Time is always limited.
+      Here is how to decide what to investigate first.
+    </p>
+    <div class="priority-grid reveal">
+      <div class="priority-panel">
+        <h3>The Real-World Constraint</h3>
+        <ul class="reality-list">
+          <li>Hundreds of alerts may arrive in a single shift</li>
+          <li>Each full investigation can take 30–90 minutes</li>
+          <li>New, critical alerts keep arriving while you work</li>
+          <li>Missing a real attack has direct organizational consequences</li>
+          <li>False positives are expected and must be cleared efficiently</li>
+        </ul>
+      </div>
+      <div class="priority-panel">
+        <h3>Prioritization Criteria</h3>
+        <div class="criteria-row">
+          <div class="criteria-icon" style="border-color:var(--red);">⚡</div>
+          <div>
+            <div class="criteria-label" style="color:var(--red);">Attack Type</div>
+            <div class="criteria-desc">DDoS and Brute Force carry higher immediate operational impact than Port Scans. Lead with the most disruptive category.</div>
+          </div>
+        </div>
+        <div class="criteria-row">
+          <div class="criteria-icon" style="border-color:var(--teal);">📊</div>
+          <div>
+            <div class="criteria-label" style="color:var(--teal);">AI Confidence Score</div>
+            <div class="criteria-desc">Higher abnormal probability = stronger signal. An alert at 0.85 takes precedence over one at 0.55.</div>
+          </div>
+        </div>
+        <div class="criteria-row">
+          <div class="criteria-icon" style="border-color:var(--amber);">🔗</div>
+          <div>
+            <div class="criteria-label" style="color:var(--amber);">Repeated Source IPs</div>
+            <div class="criteria-desc">Multiple alerts from the same source IP strongly suggests coordinated, intentional activity — not coincidence.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="priority-callout reveal">
+      Prioritization is not ignoring alerts. It is working intelligently under real-world time pressure — the defining skill that separates experienced analysts from beginners.
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- DECISION -->
+<section id="decision">
+  <div class="section-inner">
+    <div class="section-label reveal">Step 5 — Final Call</div>
+    <h2 class="reveal">Confirm or <span class="accent">Dismiss</span></h2>
+    <p class="section-desc reveal">
+      After the PCAP investigation, you reach a binary decision.
+      Both outcomes are valid — identifying false positives is as important as confirming real attacks.
+    </p>
+    <div class="decision-grid reveal">
+
+      <div class="decision-col false">
+        <h3>False Positive</h3>
+        <div class="sub">← NO EVIDENCE FOUND</div>
+        <ul class="action-list">
+          <li><span class="arrow">→</span> No packet evidence matches the claimed attack behavior</li>
+          <li><span class="arrow">→</span> Traffic appears benign — AI misclassified it</li>
+          <li><span class="arrow">→</span> Mark alert as false alarm and close it</li>
+          <li><span class="arrow">→</span> Document your reasoning — why you ruled it out</li>
+        </ul>
+      </div>
+
+      <div class="decision-center">
+        <div class="dec-connector"></div>
+        <div class="dec-label">EVIDENCE</div>
+        <div class="dec-node">Evidence<br>Found?</div>
+        <div class="dec-label">FOUND?</div>
+        <div class="dec-connector"></div>
+      </div>
+
+      <div class="decision-col true">
+        <h3>True Positive</h3>
+        <div class="sub">EVIDENCE CONFIRMED →</div>
+        <ul class="action-list">
+          <li><span class="arrow">→</span> Packet evidence clearly matches the claimed attack type</li>
+          <li><span class="arrow">→</span> Record packet numbers, timestamps, and behavior observed</li>
+          <li><span class="arrow">→</span> Escalate to incident response as appropriate</li>
+          <li><span class="arrow">→</span> Include in final investigation report</li>
+        </ul>
+      </div>
+
+      <div class="decision-note">
+        False positives are not failures. Machine learning models are imperfect and false alarms are expected in production. Correctly identifying and clearing them is a core analyst competency — it protects team focus for real threats.
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- SUMMARY -->
+<section id="summary">
+  <div class="section-inner">
+    <div class="section-label reveal">Before You Begin</div>
+    <h2 class="reveal">Task <span class="accent">Summary</span></h2>
+    <p class="section-desc reveal">
+      Everything you need to carry into the investigation.
+    </p>
+    <div class="summary-grid reveal">
+      <div class="summary-item">
+        <div class="sum-num">01</div>
+        <div>
+          <div class="sum-title">Review 15 AI-Generated Alerts</div>
+          <p class="sum-desc">Read each alert and its LIME explanation. Form an initial impression of what is being flagged and how confident the model is. Do not investigate yet — observe first.</p>
+        </div>
+      </div>
+      <div class="summary-item">
+        <div class="sum-num" style="color:var(--amber);">02</div>
+        <div>
+          <div class="sum-title">Prioritize Under Time Pressure</div>
+          <p class="sum-desc">Rank alerts by attack type, confidence score, and source IP patterns. Select which to investigate first, just like a real SOC analyst working under shift time pressure.</p>
+        </div>
+      </div>
+      <div class="summary-item">
+        <div class="sum-num">03</div>
+        <div>
+          <div class="sum-title">Acknowledge &amp; Investigate</div>
+          <p class="sum-desc">Take ownership of selected alerts and investigate the PCAP data in Wireshark. Apply the attack pattern knowledge from this training to locate specific packet-level evidence.</p>
+        </div>
+      </div>
+      <div class="summary-item">
+        <div class="sum-num" style="color:var(--green);">04</div>
+        <div>
+          <div class="sum-title">Confirm or Dismiss — Then Report</div>
+          <p class="sum-desc">Classify each investigated alert as a true positive or false positive. Compile your findings into a structured investigation report written clearly enough for non-technical stakeholders.</p>
+        </div>
+      </div>
+    </div>
+    <div class="closing-bar reveal">
+      <span>You are now ready to begin. Good luck, analyst.</span>
+      <span class="mono-tag">SOC_TRAINING_MODULE_01 // READY</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>SOC ANALYST TRAINING — CYBERSECURITY TRIAGE MODULE</span>
+  <span style="color:var(--teal);">SYSTEM STATUS: OPERATIONAL</span>
+</footer>
+
+<script>
+  // ── Scroll reveal ──
+  const reveals = document.querySelectorAll('.reveal');
+  const revealObs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 60);
+        revealObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => revealObs.observe(el));
+
+  // ── Nav: active section + progress bar ──
+  const sections   = document.querySelectorAll('section[id]');
+  const navLinks   = document.querySelectorAll('.nav-link');
+  const drawerLinks= document.querySelectorAll('.drawer-link');
+  const progressFill = document.getElementById('progressFill');
+  const progressLabel= document.getElementById('progressLabel');
+
+  function updateNav() {
+    // Reading progress (0–100%)
+    const docH = document.documentElement.scrollHeight - window.innerHeight;
+    const pct  = docH > 0 ? Math.round((window.scrollY / docH) * 100) : 0;
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = pct + '% read';
+
+    // Active section
+    let current = 'hero';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    [...navLinks, ...drawerLinks].forEach(a => {
+      const isActive = a.dataset.section === current;
+      a.classList.toggle('active', isActive);
+    });
+  }
+
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+
+  // ── Smooth scroll: close drawer on link click ──
+  const drawer   = document.getElementById('navDrawer');
+  const hamburger= document.getElementById('hamburger');
+  [...drawerLinks].forEach(a => {
+    a.addEventListener('click', () => {
+      drawer.classList.remove('open');
+    });
+  });
+  [...navLinks].forEach(a => {
+    a.addEventListener('click', () => {
+      drawer.classList.remove('open');
+    });
+  });
+
+  // ── Hamburger toggle ──
+  hamburger.addEventListener('click', () => {
+    drawer.classList.toggle('open');
+  });
+
+  // Close drawer on outside click
+  document.addEventListener('click', (e) => {
+    if (!drawer.contains(e.target) && !hamburger.contains(e.target)) {
+      drawer.classList.remove('open');
+    }
+  });
+
+  // ── Animate prob bars on scroll into view ──
+  const limeSection = document.getElementById('lime');
+  let limeAnimated = false;
+  const limeObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !limeAnimated) {
+      limeAnimated = true;
+      document.getElementById('prob-normal').style.width = '47%';
+      document.getElementById('prob-abnormal').style.width = '53%';
+    }
+  }, { threshold: 0.3 });
+  limeObserver.observe(limeSection);
+</script>
+</body>
+</html>
