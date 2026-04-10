@@ -669,6 +669,37 @@
     .lime-layout { grid-template-columns: 1fr; }
     .nav-links { display: none; }
   }
+
+/* ── Launch button ── */
+.launch-bar {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-top: none; padding: 1.5rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1.5rem; flex-wrap: wrap;
+}
+.launch-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--teal); color: #fff; text-decoration: none;
+  padding: .9rem 2rem;
+  font-family: var(--cond); font-size: 1.1rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .06em;
+  border: none; cursor: pointer;
+  transition: background .2s, transform .15s;
+  box-shadow: 0 4px 16px rgba(0,119,168,.25);
+}
+.launch-btn:hover {
+  background: var(--teal2); transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,119,168,.35);
+}
+.launch-btn .arrow {
+  font-size: 1.2rem; transition: transform .2s;
+}
+.launch-btn:hover .arrow { transform: translateX(4px); }
+.launch-note {
+  font-size: .85rem; color: var(--muted); line-height: 1.55; flex: 1;
+}
+.launch-note strong { color: var(--text); }
+
 </style>
 </head>
 <body>
@@ -1271,6 +1302,20 @@
       <span>You are now ready to begin. Good luck, analyst.</span>
       <span class="mono-tag">SOC_TRAINING_MODULE_01 // READY</span>
     </div>
+
+    <!-- Launch link -->
+    <div class="launch-bar reveal">
+      <div class="launch-note">
+        <strong>Ready to start?</strong> Open the SOC Analyst Platform to begin your investigation —
+        review the alerts, investigate the PCAP in Wireshark, and complete your incident report.
+        Keep this training page open in a separate tab for reference.
+      </div>
+      <a href="http://localhost:3000" target="_blank" class="launch-btn" id="launchBtn">
+        Open SOC Platform
+        <span class="arrow">→</span>
+      </a>
+    </div>
+
   </div>
 </section>
 
